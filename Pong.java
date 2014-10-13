@@ -1,26 +1,19 @@
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.*;
+import java.awt.event.*;
 
 import javax.swing.*;
 
-public class Pong extends JFrame implements KeyListener, ActionListener
+public class Pong implements KeyListener
 {
+	private JFrame window = new JFrame();
 	private JPanel actionArea = new JPanel();
 	private JPanel gameArea = new JPanel();
 	private JButton newGame = new JButton("New game");
 	private final int FRAMEWIDTH = 500;
 	private final int FRAMEHEIGHT = 500;
-	private int paddle1x;
-	private int paddle1y;
-	private int paddle2x;
-	private int paddle2y;
-	private JPanel paddle1 = new JPanel();
-	private JPanel paddle2 = new JPanel();
-	private JPanel ball = new JPanel();
+	private final int JUMP = 5;
+	private final int DELAY = 20;
+	private Ball ball;
 	private int player1score = 0;
 	private int player2score = 0;
 	private JLabel playerOneLabel = new JLabel();
@@ -28,15 +21,18 @@ public class Pong extends JFrame implements KeyListener, ActionListener
 	private JLabel playerTwoLabel = new JLabel();
 	private JLabel playerTwoScore = new JLabel();
 	private Dimension size;
+	private boolean running;
 	
 	public void start()
 	{
-		super.setLayout(null);
-		super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		window.setLayout(null);
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		window.addKeyListener(this);
 		
 		actionArea.setLocation(0,0);
 		actionArea.setSize(FRAMEWIDTH,50);
 		actionArea.setLayout(null);
+		actionArea.setBackground(Color.black);
 
 		gameArea.setLocation(0,actionArea.getHeight());
 		gameArea.setSize(FRAMEWIDTH,FRAMEHEIGHT - actionArea.getHeight());
@@ -46,17 +42,11 @@ public class Pong extends JFrame implements KeyListener, ActionListener
 		playerOneScore.setText(player1score + "");
 		playerTwoLabel.setText("Player 2 - ");
 		playerTwoScore.setText(player2score + "");
+		playerOneLabel.setForeground(Color.white);
+		playerOneScore.setForeground(Color.white);
+		playerTwoLabel.setForeground(Color.white);
+		playerTwoScore.setForeground(Color.white);
 
-		paddle1.setBackground(Color.black);
-		paddle2.setBackground(Color.black);
-		paddle1.addKeyListener(this);
-		paddle2.addKeyListener(this);
-		
-		paddle1x = 40;
-		paddle1y = gameArea.getHeight() / 2 - 20;
-		paddle2x = FRAMEWIDTH - 50;
-		paddle2y = gameArea.getHeight() / 2 - 20;
-        
 		setLocations();
 
 		actionArea.add(newGame);
@@ -65,16 +55,72 @@ public class Pong extends JFrame implements KeyListener, ActionListener
 		actionArea.add(playerTwoLabel);
 		actionArea.add(playerTwoScore);
 		
-		gameArea.add(paddle1);
-		gameArea.add(paddle2);
+		
+		
+		window.add(actionArea);
+		window.add(gameArea);
+		
+		window.setSize(FRAMEWIDTH, FRAMEHEIGHT);
+		window.setVisible(true);
+		window.setResizable(false);
+		window.setLocationRelativeTo(null);
+		
+		gameLoop();
+	}
+	
+	private void gameLoop(){
+		running = true;
+
+		ball = new Ball(FRAMEWIDTH / 2, gameArea.getHeight() / 2);
 		gameArea.add(ball);
+		gameArea.paintImmediately(gameArea.getVisibleRect());
 		
-		super.add(actionArea);
-		super.add(gameArea);
+		int dx = 2;
+		int dy = 2;
 		
-		super.setSize(FRAMEWIDTH, FRAMEHEIGHT);
-		super.setVisible(true);
-		super.setResizable(false);
+		while(running){
+			try{
+				ball.bounceBall(dx, dy);
+				gameArea.paintImmediately(gameArea.getVisibleRect());
+				Thread.sleep(DELAY);
+				if (bounceX()) {
+					dx = dx * -1;
+				}
+				if (bounceY()) {
+					dy = dy * -1;
+				}
+			}catch(InterruptedException f){}
+			playerOneScore.setText(player1score + "");
+			playerTwoScore.setText(player2score + "");
+			actionArea.paintImmediately(actionArea.getVisibleRect());
+			
+			if(player1score == 5 || player2score == 5){
+				running = false;
+				gameArea.remove(ball);
+			}
+		}
+	}
+	
+	private boolean bounceX(){
+		if (ball.getX() <= 0) {
+			player2score++;
+			return true;
+		}
+		else if ((ball.getX() + ball.getWidth()) >= gameArea.getWidth()) {
+			player1score++;
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean bounceY(){
+		if (ball.getY() <= 0) {
+			return true;
+		}
+		else if ((ball.getY() + ball.getHeight() + 20) >= gameArea.getHeight()) {
+			return true;
+		}
+		return false;
 	}
 	
 	private void setLocations()
@@ -91,51 +137,37 @@ public class Pong extends JFrame implements KeyListener, ActionListener
 		playerTwoScore.setBounds(FRAMEWIDTH - 100 + playerTwoLabel.getWidth(),25, size.width, size.height);
 		size = newGame.getPreferredSize();
 		newGame.setBounds(10,10, size.width, size.height);
-
-		paddle1.setBounds(paddle1x,paddle1y, 10, 40);
-		paddle2.setBounds(paddle2x,paddle2y, 10, 40);
-        
-        ball.setBackground(Color.black);
-        ball.setLocation(FRAMEWIDTH / 2, gameArea.getHeight() / 2);
-        ball.setSize(20,20);
 	}
 	
-	/** Handle the key typed event from the text field. */
-    public void keyTyped(KeyEvent e) 
-    {
-    	if(e.getKeyCode() == 38)
-        {
-        	System.out.println("up arrow pressed");
-        	paddle2y--;
-        	repaint();
-        }
-    }
-    
-    /** Handle the key pressed event from the text field. */
-    public void keyPressed(KeyEvent e) 
-    {
-    	if(e.getKeyCode() == 38)
-    	{
-    		System.out.println("up arrow pressed");
-    		paddle2y--;
-    		repaint();
-    	}
-    }
-    
-    /** Handle the key released event from the text field. */
-    public void keyReleased(KeyEvent e) 
-    {
-    	if(e.getKeyCode() == 38)
-    	{
-    		System.out.println("up arrow pressed");
-    		paddle2y--;
-    		repaint();
-    	}
-    }
-    
-    /** Handle the button click. */
-    public void actionPerformed(ActionEvent e) 
-    {
-        
-    }
+    public void keyPressed(KeyEvent e) {
+    	/*
+    	int keyCode = e.getKeyCode();
+		if(keyCode == KeyEvent.VK_UP)
+		{
+			paddle2y -= JUMP;
+		}
+		if(keyCode == KeyEvent.VK_DOWN)
+		{
+			paddle2y += JUMP;
+		}
+		if(keyCode == KeyEvent.VK_W)
+		{
+			paddle1y -= JUMP;
+		}
+		if(keyCode == KeyEvent.VK_S)
+		{
+			paddle1y += JUMP;
+		}
+		
+		e.consume();
+		*/
+	}
+
+	public void keyTyped(KeyEvent e) {
+		e.consume();
+	}
+
+	public void keyReleased(KeyEvent e) {
+		e.consume();
+	}
 }
