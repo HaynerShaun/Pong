@@ -1,28 +1,31 @@
 import java.awt.Color;
-import javax.swing.*;
+import javax.swing.JButton;
 
-class Ball extends JButton{
-		
-	private int x, y;
-	/**
-	 * Constructor for the Ship class 
-	 */
-	public Ball(int x, int y){
-		
-		this.x = x;
-		this.y = y;
-		setLocation(x,y);
-		setSize(10, 10);
-		setBackground(Color.black);
-	}   
+
+public class Ball extends JButton{
+	private int width = 10;
+	private int height = 10;
+	private int xPos, yPos;
 	
-	public void bounceBall(int dx, int dy){
-		x = x + dx;
-		y = y + dy;
-		super.setLocation(x, y);
+	public Ball(int x, int y){
+		xPos = x;
+		yPos = y;
+		super.setLocation(x,y);
+		super.setSize(width, height);
+		super.setBackground(Color.black);
 	}
 	
-	public void resetBall(int dx, int dy){
-		setLocation(dx, dy);
+	public int returnWidth(){
+		return width;
+	}
+	
+	public int returnHeight(){
+		return height;
+	}
+	
+	public void moveBall(int x, int y){
+		xPos += x;
+		yPos += y;
+		super.setLocation(xPos,yPos);
 	}
 }

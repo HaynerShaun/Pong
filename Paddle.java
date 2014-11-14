@@ -1,25 +1,26 @@
 import java.awt.Color;
-import java.awt.Graphics;
-import java.util.Random;
-import javax.swing.*;
 
-class Paddle extends JButton{
-		
-	private int x, y;
-	/**
-	 * Constructor for the Ship class 
-	 */
-	public Paddle(int x, int y){
-		
-		this.x = x;
-		this.y = y;
-		setLocation(x,y);
-		setSize(10, 40);
-		setBackground(Color.black);
-	}   
+import javax.swing.JButton;
+import javax.swing.JLabel;
+
+
+public class Paddle extends JLabel{
+
+	private int height = 40;
+	private int width = 10;
+	private int xPos, yPos;
 	
-	public void move(int dy){
-		y = y + dy;
-		super.setLocation(x, y);
+	public Paddle(int x, int y){
+		xPos = x;
+		yPos = y;
+		super.setLocation(xPos, yPos);
+		super.setSize(width, height);
+		super.setBackground(Color.black);
+		super.setOpaque(true);
+	}
+	
+	public void movePaddle(int y){
+		yPos += y;
+		super.setLocation(xPos, yPos);
 	}
 }

@@ -1,8 +1,5 @@
-public class Lab2Driver 
-{
-	public static void main(String[] args)
-	{
+public class lab2driver{
+	public static void main(String[] args){
 		Pong pong = new Pong();
-		pong.start();
 	}
 }
